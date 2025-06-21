@@ -6,6 +6,9 @@
 !/archive/.gitkeep
 
 # Data folder
+/data/*
+!/data/schemas/
+!/data/temp/
 /data/schemas/*
 !/data/schemas/.gitkeep
 /data/temp/*
@@ -28,4 +31,6 @@ __pycache__/
 # .cursor/
 
 # Deliverables
-deliverables/motivation_letter.md
+/deliverables/*
+!/deliverables/.gitkeep
+.env

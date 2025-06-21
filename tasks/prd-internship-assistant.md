@@ -4,35 +4,32 @@
 
 This document outlines the requirements for the AI-Powered Internship Assistant, a tool designed to help users generate highly personalized motivation letters by intelligently mapping their personal experience to job descriptions. This version (2.0) is a complete re-architecture focused on a modular, iterative, and AI-centric workflow, providing maximum flexibility and power to the user.
 
-The system is built on a four-stage pipeline. The user can execute these stages independently and iteratively, refining the data at each step until a satisfactory result is achieved.
+The system is built on a five-stage pipeline. The user can execute these stages independently and iteratively, refining the data at each step until a satisfactory result is achieved.
 
 ## 2. Core Stages
 
-### Stage 1: Applicant Profile Generation
--   **Input:** Raw user data (e.g., HTML export from a job portal, PDF resume, Markdown file).
--   **Process:**
-    1.  **Sanitization & Expansion (Scripted/User):** Converts various input formats (HTML, PDF) into clean Markdown. Provides a hook for the user to manually add or edit information.
-    2.  **Structured Transformation (AI):** Uses an LLM to parse the clean text and transform it into a structured `personal_data.json` file, guided by a predefined schema.
--   **Output:** A validated `personal_data.json` file.
+### Stage 1: Sanitization
+-   **Process:** Converts various raw input formats (HTML, PDF, MD) into clean, standardized Markdown files.
+-   **Output:** `data/temp/personal.md` and `data/temp/job.md`.
 
-### Stage 2: Job Description Generation
--   **Input:** A job description (e.g., Markdown file, URL, raw text).
--   **Process:**
-    1.  **Sanitization & Expansion (AI/User):** Sanitizes the input. Critically, it uses an AI-powered step to research and expand upon the provided description, gathering more context about the company, the role, and required skills. The user can also manually add details.
-    2.  **Structured Transformation (AI):** Uses an LLM to parse the augmented text and transform it into a structured `job_data.json` file, guided by a schema.
--   **Output:** A validated `job_data.json` file.
+### Stage 2: Expansion
+-   **Process:** Uses an AI-powered step to research and expand upon the sanitized job description, gathering more context about the company, the role, and required skills.
+-   **Output:** `data/temp/job_expanded.md`.
 
-### Stage 3: Interactive Mapping
--   **Input:** `personal_data.json` and `job_data.json`.
+### Stage 3: Transformation
+-   **Process:** Uses an LLM to parse the sanitized (and expanded) text and transform it into structured JSON files, guided by predefined schemas.
+-   **Output:** `data/personal_data.json` and `data/job_data.json`.
+
+### Stage 4: Interactive Mapping
 -   **Process:**
-    1.  **AI-Powered Mapping:** Performs a semantic comparison between the applicant's profile and the job description to identify relevant connections. The AI provides reasoning for each connection.
-    2.  **Interactive Refinement (User):** Presents the proposed mappings to the user in a clear terminal UI. The user can accept, reject, or request regeneration. If the user finds the mappings weak, they can loop back to Stage 1 or 2 to provide more data.
+    1.  **AI-Powered Mapping:** Performs a semantic comparison between the two JSON files to identify relevant connections.
+    2.  **Interactive Refinement (User):** Presents the proposed mappings to the user in a clear terminal UI. The user can loop back to previous stages to add more data or edit the files directly.
 -   **Output:** A user-confirmed `mappings.json` file.
 
-### Stage 4: Composition
+### Stage 5: Composition
 -   **Input:** `mappings.json`.
 -   **Process:**
-    1.  **Letter Synthesis (Scripted):** Uses the confirmed mappings and a templating engine (e.g., Jinja2) to compose the final motivation letter.
+    1.  **Letter Synthesis (Scripted):** Uses the confirmed mappings and a templating engine to compose the final motivation letter.
     2.  **Final Review (User):** Presents the generated letter to the user for final approval before saving.
 -   **Output:** A `motivation_letter.md` file.
 

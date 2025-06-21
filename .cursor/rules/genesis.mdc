@@ -168,7 +168,7 @@ The generation is an interactive, multi-step process that requires user confirma
         *   The task number.
         *   A one-sentence summary of the decision or output.
         *   A list of all files created or modified.
-        *   The full user prompt that initiated the task, if it was a direct command that modified the workflow.
+        *   The **full, verbatim user prompt** that initiated a change in workflow. This is non-negotiable for traceability. Example: `User Prompt: "the choice is not between stages 1~4, but between stages 1&2 (new or updated), 3, or 4"`
     3.  **Manage Parent Tasks:** If all sub-tasks under a parent are now complete, mark the parent task as `[x]` as well.
     4.  **Manage Scope:** Do not create new tasks or modify the scope of existing tasks without explicit user permission.
     5.  **Proceed:** Move to the next task.

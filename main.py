@@ -3,7 +3,14 @@
 # It provides a menu-driven interface to orchestrate the different stages of the process.
 
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file at the very beginning
+load_dotenv()
+
 from util.sanitizer import sanitize_html_to_markdown, sanitize_pdf_to_markdown
+from util.transformer import transform_to_json, expand_job_description
+import json
 
 # --- Helper Functions ---
 
@@ -46,20 +53,6 @@ def select_file_from_dir(directory: str, prompt_message: str, extensions: tuple)
                 print("Invalid choice.")
         except ValueError:
             print("Invalid input. Please enter a number.")
-
-def prompt_for_edit(file_path: str):
-    """Asks the user if they want to manually edit a file."""
-    while True:
-        edit_choice = input(f"Would you like to manually edit the sanitized file at '{file_path}'? (y/n): ").lower().strip()
-        if edit_choice in ['y', 'yes']:
-            input("Please open the file, make your edits, and save it. Press Enter when you are done...")
-            print(f"Continuing with the potentially edited '{file_path}'.")
-            break
-        elif edit_choice in ['n', 'no']:
-            print(f"Proceeding with '{file_path}' as is.")
-            break
-        else:
-            print("Invalid choice. Please enter 'y' or 'n'.")
 
 # --- Stage-Specific Logic ---
 
@@ -111,17 +104,98 @@ def run_sanitization():
         except Exception as e:
             print(f"Error sanitizing job description: {e}")
 
-    print("\n--- Sanitization Complete: Review Optional ---")
-    if os.path.exists(personal_temp_path):
-        prompt_for_edit(personal_temp_path)
-    if os.path.exists(job_temp_path):
-        prompt_for_edit(job_temp_path)
+    print("\n--- Sanitization Complete ---")
+    print("You can now review the generated markdown files in 'data/temp/'.")
 
 
 def run_transformation():
     """Handles Stage 1b & 2b: Transforming sanitized Markdown to structured JSON."""
     print("\n--- Running Transformation (MD -> JSON) ---")
-    print("This stage is not yet implemented.")
+    
+    # Define paths
+    personal_md_path = "data/temp/personal.md"
+    job_md_path = "data/temp/job_expanded.md"
+    personal_schema_path = "data/schemas/personal_data_schema.json"
+    job_schema_path = "data/schemas/job_data_schema.json"
+    personal_json_path = "data/personal_data.json"
+    job_json_path = "data/job_data.json"
+    transform_prompt_file = "prompts/transform_prompt.txt"
+
+    # --- Transform Personal Data ---
+    if os.path.exists(personal_md_path):
+        print(f"Found sanitized personal data at '{personal_md_path}'.")
+        try:
+            with open(personal_md_path, 'r', encoding='utf-8') as f:
+                personal_text = f.read()
+            with open(personal_schema_path, 'r', encoding='utf-8') as f:
+                personal_schema = json.load(f)
+            
+            print("Transforming personal data with LLM...")
+            personal_json = transform_to_json(personal_text, personal_schema, transform_prompt_file)
+
+            with open(personal_json_path, 'w', encoding='utf-8') as f:
+                json.dump(personal_json, f, indent=4)
+            print(f"Successfully transformed personal data to '{personal_json_path}'.")
+
+        except Exception as e:
+            print(f"An error occurred during personal data transformation: {e}")
+    else:
+        print("No sanitized personal data found to transform. Please run Sanitization first.")
+
+    # --- Transform Job Data ---
+    if os.path.exists(job_md_path):
+        print(f"Found expanded job data at '{job_md_path}'.")
+        try:
+            with open(job_md_path, 'r', encoding='utf-8') as f:
+                job_text = f.read()
+            with open(job_schema_path, 'r', encoding='utf-8') as f:
+                job_schema = json.load(f)
+
+            print("Transforming job data with LLM...")
+            job_json = transform_to_json(job_text, job_schema, transform_prompt_file)
+
+            with open(job_json_path, 'w', encoding='utf-8') as f:
+                json.dump(job_json, f, indent=4)
+            print(f"Successfully transformed job data to '{job_json_path}'.")
+            
+        except Exception as e:
+            print(f"An error occurred during job data transformation: {e}")
+    else:
+        print("No expanded job description found to transform. Please run Expansion first.")
+
+    print("\n--- Transformation Complete ---")
+    print("You can now review the generated JSON files in 'data/'.")
+
+
+def run_expansion():
+    """Handles the AI-powered expansion of job descriptions."""
+    print("\n--- Running Expansion (MD -> Augmented MD) ---")
+    
+    # Define paths
+    job_md_path = "data/temp/job.md"
+    expanded_job_md_path = "data/temp/job_expanded.md"
+    expand_prompt_file = "prompts/expand_prompt.txt"
+
+    if not os.path.exists(job_md_path):
+        print(f"Sanitized job description not found at '{job_md_path}'. Please run Sanitization first.")
+        return
+
+    try:
+        with open(job_md_path, 'r', encoding='utf-8') as f:
+            job_text = f.read()
+
+        print("Expanding job description with LLM...")
+        expanded_text = expand_job_description(job_text, expand_prompt_file)
+
+        with open(expanded_job_md_path, 'w', encoding='utf-8') as f:
+            f.write(expanded_text)
+        print(f"Successfully saved expanded job description to '{expanded_job_md_path}'.")
+
+        print("\n--- Expansion Complete ---")
+        print("You can now review the expanded markdown file in 'data/temp/'.")
+
+    except Exception as e:
+        print(f"An error occurred during job description expansion: {e}")
 
 
 # --- Main Controller ---
@@ -132,38 +206,70 @@ def display_menu():
     
     personal_status = get_data_status("external/personal info", "data/temp/personal.md", "data/personal_data.json")
     job_status = get_data_status("external/job description", "data/temp/job.md", "data/job_data.json")
+    job_expansion_status = "Expanded" if os.path.exists("data/temp/job_expanded.md") else "Not Expanded"
 
-    print(f"Personal Data Status: {personal_status} | Job Data Status: {job_status}\n")
-
-    print("1. Sanitize Raw Data (HTML/PDF -> MD)")
-    print("2. Transform Sanitized Data (MD -> JSON)")
-    print("3. Generate & Review Mappings")
-    print("4. Compose Letter")
+    print(f"Personal Data: {personal_status} | Job Data: {job_status} ({job_expansion_status})\n")
+    
+    print("--- System Actions ---")
+    print("1. Run Sanitization (Raw -> MD)")
+    print("2. Run Expansion (Job MD -> Augmented MD)")
+    print("3. Run Transformation (MD -> JSON)")
+    print("4. Generate Mappings")
+    print("5. Compose Letter")
     print("---------------------------------------")
+
+    # User Agency Menu
+    print("--- Manual Overrides ---")
+    edit_options = {}
+    if os.path.exists("data/temp/personal.md"):
+        edit_options['e1'] = ("Edit Sanitized Personal Data", "data/temp/personal.md")
+    if os.path.exists("data/temp/job_expanded.md"):
+        edit_options['e2'] = ("Edit Expanded Job Data", "data/temp/job_expanded.md")
+    else:
+        if os.path.exists("data/temp/job.md"):
+            edit_options['e2'] = ("Edit Sanitized Job Data", "data/temp/job.md")
+    if os.path.exists("data/personal_data.json"):
+        edit_options['e3'] = ("Edit Transformed Personal Data", "data/personal_data.json")
+    if os.path.exists("data/job_data.json"):
+        edit_options['e4'] = ("Edit Transformed Job Data", "data/job_data.json")
+    
+    if not edit_options:
+        print("No editable files generated yet. Run a system action first.")
+    else:
+        for key, (text, _) in edit_options.items():
+            print(f"{key}. {text}")
+
     print("exit - Exit the application")
     print("---------------------------------------")
+    return edit_options
 
 def main():
     """Main function to run the menu-driven application."""
     while True:
-        display_menu()
-        choice = input("Enter your choice (1-4): ").strip()
+        edit_options = display_menu()
+        choice = input("Enter your choice: ").strip().lower()
 
         if choice == '1':
             run_sanitization()
         elif choice == '2':
-            run_transformation()
+            run_expansion()
         elif choice == '3':
-            print("\nExecuting Stage 3: Generate & Review Mappings...")
-            print("Stage 3 not yet implemented.")
+            run_transformation()
         elif choice == '4':
-            print("\nExecuting Stage 4: Compose Motivation Letter...")
+            print("\nExecuting: Generate Mappings...")
             print("Stage 4 not yet implemented.")
-        elif choice.lower() == 'exit':
+        elif choice == '5':
+            print("\nExecuting: Compose Letter...")
+            print("Stage 5 not yet implemented.")
+        elif choice in edit_options:
+            file_to_edit = edit_options[choice][1]
+            print(f"\nOpening '{file_to_edit}' for manual review.")
+            input("The system will now pause. Please open and edit the file directly.\nPress Enter when you are done to return to the menu...")
+        elif choice == 'exit':
             print("Exiting application. Goodbye!")
             break
         else:
-            print("Invalid choice. Please enter a number from 1 to 4.")
+            print("Invalid choice. Please enter a valid option.")
 
 if __name__ == "__main__":
     main() 
