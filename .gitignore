@@ -1,0 +1,31 @@
+# Ignore all files in the following directories, but keep the directories
+# in the git history by tracking an empty .gitkeep file.
+
+# Archive folder
+/archive/*
+!/archive/.gitkeep
+
+# Data folder
+/data/schemas/*
+!/data/schemas/.gitkeep
+/data/temp/*
+!/data/temp/.gitkeep
+
+# External folder
+/external/job description/*
+!/external/job description/.gitkeep
+/external/personal info/*
+!/external/personal info/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Mac-specific files
+.DS_Store
+
+# Cursor-specific files
+# .cursor/
+
+# Deliverables
+deliverables/motivation_letter.md

@@ -1,0 +1,49 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule: Generating a Product Requirements Document (PRD)
+
+## Goal
+To guide an AI assistant in creating a detailed Product Requirements Document (PRD) in Markdown format, based on an initial user prompt. The PRD should be clear, actionable, and suitable for a junior developer to understand and implement the feature.
+
+## Process
+1.  **Receive Initial Prompt:** The user provides a brief description or request for a new feature or functionality. If no description is provided, check `external/`.
+2.  **Process External Files:**
+    *   Internship Roster.pdf should be converted with marker (for reference, search pdf_to_markdown.py from desktop) to parse the information of an internship position, for which @Job Submission - Internship Roster (Job Number- 25001-INT).html provides my data. this project facilitates the completion of such data, most noteably, but not limited to, the Letter of motivation
+3.  **Ask Clarifying Questions:** Before writing the PRD, the AI *must* ask clarifying questions to gather sufficient detail. The goal is to understand the "what" and "why" of the feature, not necessarily the "how" (which the developer will figure out).
+4.  **Generate PRD:** Based on the initial prompt and the user's answers to the clarifying questions, generate a PRD using the structure outlined below.
+5.  **Save PRD:** Save the generated document as `prd-[feature-name].md` inside the `tasks/` directory.
+
+## Clarifying Questions (Examples)
+*   **Problem/Goal:** "What problem does this feature solve for the user?"
+*   **Target User:** "Who is the primary user of this feature?"
+*   **Core Functionality:** "Can you describe the key actions a user should be able to perform?"
+*   **User Stories:** "Could you provide a few user stories?"
+*   **Acceptance Criteria:** "How will we know when this feature is successfully implemented?"
+*   **Scope/Boundaries:** "Are there any specific things this feature *should not* do?"
+
+## PRD Structure
+1.  **Introduction/Overview**
+2.  **Goals**
+3.  **User Stories**
+4.  **Functional Requirements**
+5.  **Non-Goals (Out of Scope)**
+6.  **Design Considerations (Optional)**
+7.  **Technical Considerations (Optional)**
+8.  **Success Metrics**
+9.  **Open Questions**
+
+## Target Audience
+Assume the primary reader of the PRD is a **junior developer**.
+
+## Output
+*   **Format:** Markdown (`.md`)
+*   **Location:** `tasks/`
+*   **Filename:** `prd-[feature-name].md`
+
+## Final instructions
+1. Do NOT start implementing the PRD
+2. Make sure to ask the user clarifying questions
+3. Take the user's answers to the clarifying questions and improve the PRD

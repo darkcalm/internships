@@ -1,0 +1,51 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule: Generating a Task List from a PRD
+
+## Goal
+To guide an AI assistant in creating a detailed, step-by-step task list in Markdown format based on an existing Product Requirements Document (PRD).
+
+## Output
+- **Format:** Markdown (`.md`)
+- **Location:** `tasks/`
+- **Filename:** `tasks-[prd-file-name].md`
+
+## Process
+1. **Receive PRD Reference:** User points to a PRD file.
+2. **Analyze PRD:** Read and understand the PRD.
+3. **Phase 1: Generate Parent Tasks:** Create high-level tasks. Present to the user and ask for 'Go' to proceed.
+4. **Wait for Confirmation:** Pause for user to say "Go".
+5. **Phase 2: Generate Sub-Tasks:** Break down parent tasks into detailed sub-tasks.
+6. **Identify Deliverables:** List all deliverables and mark the tasks that produce them.
+7. **Generate Final Output:** Combine everything into the final Markdown file.
+8. **Save Task List:** Save to `tasks/tasks-[prd-file-name].md`.
+
+## Output Format
+`markdown
+## Deliverables
+
+- `deliverables/path/to/file1.ext` - Description
+- `deliverables/path/to/file2.ext` - Description
+
+## Tasks (refer to @/rules/process-task-list before executing)
+
+- [ ] 1.0 Parent Task
+  - [ ] 1.1 Sub-task
+    - [ ] 1.1.1 Detailed sub-task
+`
+
+## Task Numbering Convention
+- Use X.Y.Z format.
+- Dependencies follow recency.
+
+## Quality Assurance
+- Tasks must be verifiable, complete, and traceable.
+
+## Interaction Model
+Requires a pause for user confirmation ("Go") before generating sub-tasks.
+
+## Target Audience
+A **junior developer**.

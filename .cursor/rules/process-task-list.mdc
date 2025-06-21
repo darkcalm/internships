@@ -1,0 +1,34 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule: Task List Management
+
+This rule defines the lifecycle for processing each task to ensure consistency, clarity, and robust documentation.
+
+## Task Lifecycle
+
+### Phase 1: Task Initiation
+1.  **Review Context:** Before starting a task, review relevant project files (especially in `docs/`, `util/`, and `data/`) and the history in `docs/task-log.md` to gather full context.
+2.  **Propose Action:** Present a clear, actionable proposal for the current task.
+3.  **Format Output:** The proposal must be prefixed with the task number (e.g., "1.2: [Proposal]").
+
+### Phase 2: Task Execution
+1.  **Await Confirmation:** **Do not proceed** without explicit user confirmation ("yes" or "y").
+2.  **Execute:** Perform the task, adhering to the following guidelines:
+    *   **Best Practices:** Employ standard best practices for the task type.
+    *   **Directory Standards:** Use the standard project directory locations (`util/` for scripts, `data/` for data, `docs/` for documentation, `archive/` for old files).
+    *   **Security:** Ensure secrets are loaded from environment variables or a secure configuration system, never hardcoded.
+
+### Phase 3: Task Completion
+1.  **Update Task List:** Mark the just-completed task as `[x]` in the task list file.
+2.  **Log Decision:** Append a record of the completed task to `docs/task-log.md`. The entry **must** include:
+    *   An ISO-8601 timestamp.
+    *   The task number.
+    *   A one-sentence summary of the decision or output.
+    *   A list of all files created or modified.
+    *   The full user prompt that initiated the task, if it was a direct command that modified the workflow.
+3.  **Manage Parent Tasks:** If all sub-tasks under a parent are now complete, mark the parent task as `[x]` as well.
+4.  **Manage Scope:** Do not create new tasks or modify the scope of existing tasks without explicit user permission.
+5.  **Proceed:** Move to the next task.
