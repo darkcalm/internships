@@ -22,14 +22,16 @@
 - [x] 5.1 In `main.py`, implement the dynamic menu that lists editable files.
 - [x] 5.2 Implement the controller logic to handle user selections for editing files.
 
-[ ] 6.0 Parent Task: Stage 4 - Mapping (System Action)
-- [ ] 6.1 Create a `util/mapper.py` module and implement `generate_mappings()`.
-- [ ] 6.2 In `main.py`, implement the "Generate Mappings" flow.
+[ ] 6.0 Parent Task: Stage 4 - Mapping (Discovery)
+- [x] 6.1 Update `util/mapper.py` to remove the similarity threshold, ensuring all potential mappings are discovered.
+- [x] 6.2 Create `prompts/reasoning_prompt.txt` with instructions for the AI to act as a career coach and explain the causal link between an experience and a requirement.
+- [x] 6.3 Update `generate_mappings()` to use a second LLM call, guided by the new prompt, to generate a 'reasoning' string for each potential match.
+- [x] 6.4 In `main.py`, update the "Generate Mappings" flow to reflect the new mapper logic.
 
-[ ] 7.0 Parent Task: Stage 5 - Composition & Finalization
-- [ ] 7.1 Create a `util/composer.py` module and a `templates/letter_template.md` file.
-- [ ] 7.2 In `main.py`, implement the "Compose Letter" flow.
-- [ ] 7.3 Finalize project documentation and perform end-to-end testing.
+[x] 7.0 Parent Task: Stage 5 - Composition & Finalization
+- [x] 7.1 Create a `util/composer.py` module and a `templates/letter_template.md` file.
+- [x] 7.2 In `main.py`, implement the "Compose Letter" flow.
+- [x] 7.3 Finalize project documentation and perform end-to-end testing.
 
 ## Deliverables
 

@@ -24,3 +24,10 @@
 2024-06-21T14:35:00Z - 3.2 (Re-architected): Implemented the `expand_job_description` function in the transformer module. Files modified: util/transformer.py
 2024-06-21T14:40:00Z - 3.3 (Re-architected): Implemented the `run_expansion` flow in the main controller. Files modified: main.py
 2024-06-21T15:00:00Z - 5.0: Implemented the User Agency menu, which dynamically lists editable files and allows the user to open them for review, separating system actions from user overrides. Files modified: main.py
+2024-06-21T15:15:00Z - 6.0: Implemented the semantic mapping stage, creating the mapper module and integrating it into the main controller. Files created: util/mapper.py. Files modified: main.py
+2024-06-21T15:30:00Z - 6.1: Refactored the mapper to be lossless by removing the similarity threshold, ensuring all potential connections are captured for user review. Files modified: util/mapper.py
+2024-06-21T15:45:00Z - 6.2: Created a new prompt file to guide the AI in generating causal reasoning for each semantic match. Files created: prompts/reasoning_prompt.txt
+2024-06-21T15:50:00Z - 6.3: Implemented the reasoning generation step in the mapper, which now enriches the mappings with an AI-generated explanation for each connection. Files modified: util/mapper.py
+2024-06-21T15:55:00Z - 6.4: Finalized the mapping stage by integrating the new reasoning prompt into the main controller. Files modified: main.py
+2024-06-21T16:15:00Z - 7.0: Implemented the final composition stage, including the narrative-driven template and the main controller logic. Files created: templates/letter_template.md, util/composer.py. Files modified: main.py
+2024-06-21T16:20:00Z - Refactor: Removed all intermediate user approval steps from the main pipeline, delegating user agency to the manual override menu for a cleaner workflow. Files modified: main.py

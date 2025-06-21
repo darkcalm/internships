@@ -4,13 +4,16 @@
 
 import os
 from dotenv import load_dotenv
+from util.transformer import transform_to_json, expand_job_description
+from util.mapper import generate_mappings
+from util.composer import generate_letter
+import json
+import argparse
 
 # Load environment variables from .env file at the very beginning
 load_dotenv()
 
 from util.sanitizer import sanitize_html_to_markdown, sanitize_pdf_to_markdown
-from util.transformer import transform_to_json, expand_job_description
-import json
 
 # --- Helper Functions ---
 
@@ -105,7 +108,7 @@ def run_sanitization():
             print(f"Error sanitizing job description: {e}")
 
     print("\n--- Sanitization Complete ---")
-    print("You can now review the generated markdown files in 'data/temp/'.")
+    print("You can now review the generated markdown files in 'data/temp/' using the manual override options.")
 
 
 def run_transformation():
@@ -164,7 +167,7 @@ def run_transformation():
         print("No expanded job description found to transform. Please run Expansion first.")
 
     print("\n--- Transformation Complete ---")
-    print("You can now review the generated JSON files in 'data/'.")
+    print("You can now review the generated JSON files in 'data/' using the manual override options.")
 
 
 def run_expansion():
@@ -192,10 +195,56 @@ def run_expansion():
         print(f"Successfully saved expanded job description to '{expanded_job_md_path}'.")
 
         print("\n--- Expansion Complete ---")
-        print("You can now review the expanded markdown file in 'data/temp/'.")
+        print("You can now review the expanded markdown file in 'data/temp/' using the manual override options.")
 
     except Exception as e:
         print(f"An error occurred during job description expansion: {e}")
+
+
+def run_mapping_generation():
+    """Handles Stage 4: Generates semantic mappings between personal and job data."""
+    print("\n--- Running Mapping Generation ---")
+    
+    personal_data_path = "data/personal_data.json"
+    job_data_path = "data/job_data.json"
+    mappings_output_path = "data/mappings.json"
+    reasoning_prompt_path = "prompts/reasoning_prompt.txt"
+
+    if not all(os.path.exists(p) for p in [personal_data_path, job_data_path]):
+        print("Error: Both 'personal_data.json' and 'job_data.json' must exist to generate mappings.")
+        print("Please run the Sanitization and Transformation stages first.")
+        return
+        
+    generate_mappings(personal_data_path, job_data_path, mappings_output_path, reasoning_prompt_path)
+
+
+def run_composition():
+    """Handles Stage 5: Composes the final motivation letter."""
+    print("\n--- Running Composition ---")
+    
+    # Define paths
+    mappings_path = "data/mappings.json"
+    personal_data_path = "data/personal_data.json"
+    job_data_path = "data/job_data.json"
+    template_path = "templates/letter_template.md"
+    output_path = "deliverables/motivation_letter.md"
+
+    if not all(os.path.exists(p) for p in [mappings_path, personal_data_path, job_data_path]):
+        print("Error: Not all required data files exist. Please run previous stages first.")
+        return
+
+    try:
+        # Generate the letter
+        letter_content = generate_letter(template_path, mappings_path, personal_data_path, job_data_path)
+        
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(letter_content)
+        print(f"\n--- Letter Composed Successfully ---")
+        print(f"The final letter has been saved to '{output_path}'.")
+        print("You can now review it using the manual override options.")
+        
+    except Exception as e:
+        print(f"An error occurred during letter composition: {e}")
 
 
 # --- Main Controller ---
@@ -232,6 +281,8 @@ def display_menu():
         edit_options['e3'] = ("Edit Transformed Personal Data", "data/personal_data.json")
     if os.path.exists("data/job_data.json"):
         edit_options['e4'] = ("Edit Transformed Job Data", "data/job_data.json")
+    if os.path.exists("deliverables/motivation_letter.md"):
+        edit_options['e5'] = ("Review Composed Letter", "deliverables/motivation_letter.md")
     
     if not edit_options:
         print("No editable files generated yet. Run a system action first.")
@@ -245,31 +296,43 @@ def display_menu():
 
 def main():
     """Main function to run the menu-driven application."""
+    parser = argparse.ArgumentParser(description="AI-Powered Internship Assistant")
+    parser.add_argument("stage", nargs='?', default=None, help="The stage to run directly (1-5).")
+    args = parser.parse_args()
+
+    if args.stage:
+        run_stage(args.stage)
+        return
+
     while True:
         edit_options = display_menu()
         choice = input("Enter your choice: ").strip().lower()
-
-        if choice == '1':
-            run_sanitization()
-        elif choice == '2':
-            run_expansion()
-        elif choice == '3':
-            run_transformation()
-        elif choice == '4':
-            print("\nExecuting: Generate Mappings...")
-            print("Stage 4 not yet implemented.")
-        elif choice == '5':
-            print("\nExecuting: Compose Letter...")
-            print("Stage 5 not yet implemented.")
-        elif choice in edit_options:
-            file_to_edit = edit_options[choice][1]
-            print(f"\nOpening '{file_to_edit}' for manual review.")
-            input("The system will now pause. Please open and edit the file directly.\nPress Enter when you are done to return to the menu...")
-        elif choice == 'exit':
-            print("Exiting application. Goodbye!")
+        if run_stage(choice, edit_options) == 'exit':
             break
-        else:
-            print("Invalid choice. Please enter a valid option.")
+
+
+def run_stage(choice, edit_options={}):
+    """Runs a specific stage based on user choice."""
+    if choice == '1':
+        run_sanitization()
+    elif choice == '2':
+        run_expansion()
+    elif choice == '3':
+        run_transformation()
+    elif choice == '4':
+        run_mapping_generation()
+    elif choice == '5':
+        run_composition()
+    elif choice in edit_options:
+        file_to_edit = edit_options[choice][1]
+        print(f"\nOpening '{file_to_edit}' for manual review.")
+        print("The system will now pause. Please open and edit the file directly.")
+        input("Press Enter when you are done to return to the menu...")
+    elif choice == 'exit':
+        print("Exiting application. Goodbye!")
+        return 'exit'
+    else:
+        print("Invalid choice. Please enter a valid option.")
 
 if __name__ == "__main__":
     main() 
